@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game with Voice</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.10.3/babel.min.js" crossorigin></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-presets="react,stage-3">
+        const initialGameState = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+
+          // Mapping of chess pieces to their respective image URLs
+    const pieceImages = {
+      'r': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407092578160710/Chess_Icons-12.png?ex=66fc58c1&is=66fb0741&hm=0f2b164de12553b74dbe775d92f2227b8f1c1660e1744db6a65a9337a027e029&',
+      'n': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407094201094274/Chess_Icons-11.png?ex=66fc58c1&is=66fb0741&hm=69cc081e81451341f3f924660d68953a74d30335f41c47ef02becba0c59a1cc6&',
+      'b': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407093895036998/Chess_Icons-10.png?ex=66fc58c1&is=66fb0741&hm=d28a08da962cce9f769d7a7a07dc9588e1432bc321803412579bbad0991cdf0a&',
+      'q': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407093257633793/Chess_Icons-08.png?ex=66fc58c1&is=66fb0741&hm=d8515190ff2d48a8731ea3001d5c77afbc009e4d11c72cc3bf308dfa06712b3b&',
+      'k': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407093584527513/Chess_Icons-09.png?ex=66fc58c1&is=66fb0741&hm=9e1f81c32c8e9eec07e6a04ac48f06cea7181e076d7898fe02614acd25318ef2&',
+      'p': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407092837945454/Chess_Icons-07.png?ex=66fc58c1&is=66fb0741&hm=37d59a65ce56b2eaaadfd8fae918c3c954ef11547afedde4f8972b8cb581e7fb&',
+      'R': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407116800000172/Chess_Icons-06.png?ex=66fc58c7&is=66fb0747&hm=543ee2836e6ba3b548f66a79d4147c8cb9405cf9fb615392f5b2d066a8b921f4&',
+      'N': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407116502470698/Chess_Icons-05.png?ex=66fc58c7&is=66fb0747&hm=cb116e2cc530ce4213a5cf571d8e13cdb5cb4cad9c1fdfc139ab1a9c991ca020&',
+      'B': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407116221448244/Chess_Icons-04.png?ex=66fc58c7&is=66fb0747&hm=650e9ae9a18509bd4b0594299a4ec0dbe9a78bc87f3523994c8252755613a36f&',
+      'Q': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407115600433256/Chess_Icons-02.png?ex=66fc58c6&is=66fb0746&hm=7a400ebd8a6e2adc90b945b7b56132c34d72d6953d2922afbfc3edf4729d95f8&',
+      'K': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407115915133022/Chess_Icons-03.png?ex=66fc58c7&is=66fb0747&hm=bd7d3676bf282e6dfdacdfc41a49166f9ea815c6862616545b85fcdc102e1ffb&',
+      'P': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407115151904818/Chess_Icons-01.png?ex=66fc58c6&is=66fb0746&hm=24cd5245359321f15d24eb4008e27b9faac1c231ff3458880cea8f2e5468f458&'
+    };
+       
+
+        function speak(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            speechSynthesis.speak(utterance);
+        }
+
+        function GameControls({ onStartGame, onRestartGame, checkmate, toggleVoice, voiceEnabled }) {
+            return (
+                <div>
+                    <button onClick={onStartGame}>Start Game</button>
+                    <button onClick={onRestartGame}>Restart Game</button>
+                    <button onClick={toggleVoice}>
+                        {voiceEnabled ? 'Disable Voice' : 'Enable Voice'}
+                    </button>
+                    {checkmate && <h1>Checkmate!</h1>}
+                </div>
+            );
+        }
+
+        function Game() {
+            const [game, setGame] = React.useState(initialGameState);
+            const [selectedSquare, setSelectedSquare] = React.useState(null);
+            const [turn, setTurn] = React.useState('white');
+            const [gameStarted, setGameStarted] = React.useState(false);
+            const [checkmate, setCheckmate] = React.useState(false);
+            const [voiceEnabled, setVoiceEnabled] = React.useState(false);
+
+            function toggleVoice() {
+                setVoiceEnabled(prev => !prev);
+            }
+
+            function startGame() {
+                setGameStarted(true);
+                setCheckmate(false);
+            }
+
+            function restartGame() {
+                setGame(initialGameState);
+                setSelectedSquare(null);
+                setTurn('white');
+                setGameStarted(false);
+                setCheckmate(false);
+                window.speechSynthesis.cancel(); // Cancel any ongoing speech
+            }
+
+            function handleClick(row, col) {
+                if (checkmate || !gameStarted) return; // Disable moves if checkmate or game hasn't started
+
+                if (selectedSquare) {
+                    const [selectedRow, selectedCol] = selectedSquare;
+                    const piece = game[selectedRow][selectedCol];
+
+                    // Validate if it's the correct turn
+                    if ((turn === 'white' && piece === piece.toUpperCase()) || (turn === 'black' && piece === piece.toLowerCase())) {
+                        // Assuming isValidMove is a function you will implement to check valid moves
+                        if (isValidMove(piece, selectedRow, selectedCol, row, col, game)) {
+                            const newGame = game.map(r => r.slice());
+                            newGame[row][col] = piece;
+                            newGame[selectedRow][selectedCol] = '';
+
+                            // Announce the move
+                            if (voiceEnabled) {
+                                const from = `${String.fromCharCode(97 + selectedCol)}${8 - selectedRow}`;
+                                const to = `${String.fromCharCode(97 + col)}${8 - row}`;
+                                speak(`${turn.charAt(0).toUpperCase() + turn.slice(1)} moved ${piece} from ${from} to ${to}`);
+                            }
+
+                            setGame(newGame);
+                            setTurn(turn === 'white' ? 'black' : 'white');
+
+                            // Check for checkmate condition (implement this function)
+                            if (isCheckmate(newGame, turn)) {
+                                setCheckmate(true);
+                                if (voiceEnabled) {
+                                    speak("Checkmate!");
+                                }
+                            }
+                        }
+                    }
+                    setSelectedSquare(null);
+                } else {
+                    if (game[row][col] && ((turn === 'white' && game[row][col] === game[row][col].toUpperCase()) || (turn === 'black' && game[row][col] === game[row][col].toLowerCase()))) {
+                        setSelectedSquare([row, col]);
+                    }
+                }
+            }
+
+            return (
+                <div>
+                    <GameControls
+                        onStartGame={startGame}
+                        onRestartGame={restartGame}
+                        checkmate={checkmate}
+                        toggleVoice={toggleVoice}
+                        voiceEnabled={voiceEnabled}
+                    />
+                    <h2>{gameStarted && !checkmate ? `${turn.charAt(0).toUpperCase() + turn.slice(1)}'s Turn` : 'Game not started'}</h2>
+                    {gameStarted && (
+                        <Board game={game} onSquareClick={handleClick} selectedSquare={selectedSquare} />
+                    )}
+                </div>
+            );
+        }
+
+        function Board({ game, onSquareClick, selectedSquare }) {
+            return (
+                <div>
+                    {game.map((row, rowIndex) => (
+                        <div key={rowIndex} style={{ display: 'flex' }}>
+                            {row.map((value, colIndex) => (
+                                <Square
+                                    key={colIndex}
+                                    value={value}
+                                    onClick={() => onSquareClick(rowIndex, colIndex)}
+                                    isLight={(rowIndex + colIndex) % 2 === 0}
+                                    isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
+                                />
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        function Square({ value, onClick, isLight, isSelected }) {
+            const squareStyle = {
+                width: '80px',
+                height: '80px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                cursor: 'pointer',
+                backgroundColor: isSelected ? '#080F0F' : (isLight ? '#EDC79B' : '#D3745F'),
+                border: '1px solid #3E3E3D'
+            };
+
+            return (
+                <button style={squareStyle} onClick={onClick}>
+                    {value ? <img src={pieceImages[value]} alt={value} style={{ width: '60px', height: '80px' }} /> : null}
+                </button>
+            );
+        }
+
+        // Placeholder for valid move check
+        function isValidMove(piece, fromRow, fromCol, toRow, toCol, game) {
+            // Implement your piece movement logic here
+            return true; // Temporary: Replace with actual movement logic
+        }
+
+        // Placeholder for checkmate check
+        function isCheckmate(game, turn) {
+            // Implement your checkmate logic here
+            return false; // Temporary: Replace with actual checkmate logic
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<Game />);
+    </script>
+</body>
+</html>
