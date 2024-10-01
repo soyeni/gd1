@@ -24,7 +24,7 @@
             ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
         ];
 
-          // Mapping of chess pieces to their respective image URLs
+        // Mapping of chess pieces to their respective image URLs
     const pieceImages = {
       'r': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407092578160710/Chess_Icons-12.png?ex=66fc58c1&is=66fb0741&hm=0f2b164de12553b74dbe775d92f2227b8f1c1660e1744db6a65a9337a027e029&',
       'n': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407094201094274/Chess_Icons-11.png?ex=66fc58c1&is=66fb0741&hm=69cc081e81451341f3f924660d68953a74d30335f41c47ef02becba0c59a1cc6&',
@@ -39,7 +39,6 @@
       'K': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407115915133022/Chess_Icons-03.png?ex=66fc58c7&is=66fb0747&hm=bd7d3676bf282e6dfdacdfc41a49166f9ea815c6862616545b85fcdc102e1ffb&',
       'P': 'https://cdn.discordapp.com/attachments/937431064467628072/1290407115151904818/Chess_Icons-01.png?ex=66fc58c6&is=66fb0746&hm=24cd5245359321f15d24eb4008e27b9faac1c231ff3458880cea8f2e5468f458&'
     };
-       
 
         function speak(message) {
             const utterance = new SpeechSynthesisUtterance(message);
@@ -94,7 +93,6 @@
 
                     // Validate if it's the correct turn
                     if ((turn === 'white' && piece === piece.toUpperCase()) || (turn === 'black' && piece === piece.toLowerCase())) {
-                        // Assuming isValidMove is a function you will implement to check valid moves
                         if (isValidMove(piece, selectedRow, selectedCol, row, col, game)) {
                             const newGame = game.map(r => r.slice());
                             newGame[row][col] = piece;
@@ -110,11 +108,11 @@
                             setGame(newGame);
                             setTurn(turn === 'white' ? 'black' : 'white');
 
-                            // Check for checkmate condition (implement this function)
-                            if (isCheckmate(newGame, turn)) {
+                            // Check if the king is captured (game over)
+                            if (isKingCaptured(newGame)) {
                                 setCheckmate(true);
                                 if (voiceEnabled) {
-                                    speak("Checkmate!");
+                                    speak("Checkmate! The game is over.");
                                 }
                             }
                         }
@@ -136,7 +134,7 @@
                         toggleVoice={toggleVoice}
                         voiceEnabled={voiceEnabled}
                     />
-                    <h2>{gameStarted && !checkmate ? `${turn.charAt(0).toUpperCase() + turn.slice(1)}'s Turn` : 'Game not started'}</h2>
+                    <h2>{gameStarted && !checkmate ? `${turn.charAt(0).toUpperCase() + turn.slice(1)}'s 				Turn` : 'Game not started'}</h2>
                     {gameStarted && (
                         <Board game={game} onSquareClick={handleClick} selectedSquare={selectedSquare} />
                     )}
@@ -183,20 +181,94 @@
             );
         }
 
-        // Placeholder for valid move check
+        // Function to check if the piece is blocked by other pieces
+        function isPathClear(fromRow, fromCol, toRow, toCol, game) {
+            const rowDirection = Math.sign(toRow - fromRow);
+            const colDirection = Math.sign(toCol - fromCol);
+            
+            let row = fromRow + rowDirection;
+            let col = fromCol + colDirection;
+
+            while (row !== toRow || col !== toCol) {
+                if (game[row][col] !== '') return false; // Blocked by another piece
+                row += rowDirection;
+                col += colDirection;
+            }
+            return true;
+        }
+
+        // Function to check if the move is valid based on piece movement rules
         function isValidMove(piece, fromRow, fromCol, toRow, toCol, game) {
-            // Implement your piece movement logic here
-            return true; // Temporary: Replace with actual movement logic
+            const targetSquare = game[toRow][toCol];
+
+            // Prevent capturing own piece
+            if (piece.toLowerCase() === targetSquare.toLowerCase()) {
+                return false;
+            }
+
+            const pieceType = piece.toLowerCase();
+            const isWhite = piece === piece.toUpperCase();
+
+            switch (pieceType) {
+                case 'p': // Pawn
+                    const direction = isWhite ? -1 : 1;
+                    const startRow = isWhite ? 6 : 1;
+                    const isStartRow = fromRow === startRow;
+
+                    if (fromCol === toCol) { // Moving forward
+                        if (toRow === fromRow + direction && !targetSquare) return true;
+                        if (isStartRow && toRow === fromRow + 2 * direction && !targetSquare) return true;
+                    } else if (Math.abs(fromCol - toCol) === 1 && toRow === fromRow + direction) { // Capture diagonally
+                        if (targetSquare) return true;
+                    }
+                    return false;
+
+                case 'r': // Rook
+                    if (fromRow === toRow || fromCol === toCol) {
+                        return isPathClear(fromRow, fromCol, toRow, toCol, game);
+                    }
+                    return false;
+
+                case 'n': // Knight
+                    return (Math.abs(fromRow - toRow) === 2 && Math.abs(fromCol - toCol) === 1) ||
+                           (Math.abs(fromRow - toRow) === 1 && Math.abs(fromCol - toCol) === 2);
+
+                case 'b': // Bishop
+                    if (Math.abs(fromRow - toRow) === Math.abs(fromCol - toCol)) {
+                        return isPathClear(fromRow, fromCol, toRow, toCol, game);
+                    }
+                    return false;
+
+                case 'q': // Queen
+                    if (fromRow === toRow || fromCol === toCol || Math.abs(fromRow - toRow) === Math.abs(fromCol - toCol)) {
+                        return isPathClear(fromRow, fromCol, toRow, toCol, game);
+                    }
+                    return false;
+
+                case 'k': // King
+                    return Math.abs(fromRow - toRow) <= 1 && Math.abs(fromCol - toCol) <= 1;
+
+                default:
+                    return false;
+            }
         }
 
-        // Placeholder for checkmate check
-        function isCheckmate(game, turn) {
-            // Implement your checkmate logic here
-            return false; // Temporary: Replace with actual checkmate logic
+        // Function to check if a king is captured (end game)
+        function isKingCaptured(game) {
+            let whiteKingAlive = false;
+            let blackKingAlive = false;
+
+            game.forEach(row => {
+                row.forEach(piece => {
+                    if (piece === 'K') whiteKingAlive = true;
+                    if (piece === 'k') blackKingAlive = true;
+                });
+            });
+
+            return !(whiteKingAlive && blackKingAlive);
         }
 
-        const root = ReactDOM.createRoot(document.getElementById("root"));
-        root.render(<Game />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<Game />);
     </script>
 </body>
 </html>
