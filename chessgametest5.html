@@ -11,305 +11,186 @@
 </head>
 <body>
 <div id="root"></div>
- 
-    <script type="text/babel" data-presets="react,stage-3">
 
-        const initialGameState = [
+<script type="text/babel" data-presets="react,stage-3">
+  const initialGameState = [
+    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+    ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+  ];
 
-            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+  const pieceImages = {
+    'r': 'https://lh3.googleusercontent.com/pw/AP1GczOvRtC-7SL1mmJYpnPoJU5yRfIh0IrGq0FA9cYsQIASfcEW93qf5wTYnbPLT_s9yf-_2Jmptbg7uBHRD1hb7L9ZJJ6ySGkgz_DcL5UCfZ70Wq06ARI=w2400',
+    'n': 'https://lh3.googleusercontent.com/pw/AP1GczP8ohY0rE39TVx5wod30REkAcD4UtrbO8cQYsxvKYql8IYK1JpadhQY6jcIfl9UJ5yCuk-JLSU8sWj5ldmg9JoPTlM99pytizseRpCrkMEkuJ-IvRQ=w2400',
+    'b': 'https://lh3.googleusercontent.com/pw/AP1GczMa2nl5Qz0vOTHJEUTHtc5e_TZn1QFD4JVbgRK8lyKrFtqqgIaPlFhHJpSyyk1Tt076k02AThx4vxv0rPdCvwovNAJBQz_Fx_eCS5JP5QdzTM8biGU=w2400',
+    'k': 'https://lh3.googleusercontent.com/pw/AP1GczM9BqmjtBVG1l1TgMPc4G1WvOl0yjdPT02eGlRHgzjpaAMwudY2S55e_OOchSjBDiVppcHnJY2xg7VE5P-g-wJLxoM_MwYlc5xLjE2fDskh9D4yRp8=w2400',
+    'q': 'https://lh3.googleusercontent.com/pw/AP1GczPzmtessAqzm6vT8bRi5mK0aHCoU81w37oV1YPFOAWSisb7jFaAzTHk0HDOlSkuDtf1X6ryEOmGKbhn26Crei1Z8Rwozw3qtC-PvvXku4pAv6LL_t4=w2400',
+    'p': 'https://lh3.googleusercontent.com/pw/AP1GczOUjQkU3ZX1W0n6TvokrFu4QLJjf7EQ-xAiBRnDyr1JFvY5OTT78waWlB07C1q2WapggEMbXCgiwlQg5nao5oCFrzfKRLE1nYOrHhW4fZBu8c7Q6x8=w2400',
+    'R': 'https://lh3.googleusercontent.com/pw/AP1GczMKfvruSyDmtY0_L5dkiCWVrKFeQQl1cCvyGt-dJp1BU0lKvWwevV_pu8LI-KuOkqxuHg4Dr3YtMYndhZcrB31ENXpNIwyL3svkG6JrBb1F8gk402Q=w2400',
+    'N': 'https://lh3.googleusercontent.com/pw/AP1GczNoQjKq9a3tj9BiT7be-emPWPsRqx5eD9SaUEjuPAzBu_0o5lLtsLcjTbiDDhgVtelq-QdSbt4RyfWhYIttOFfqsUv4MLlSTCF4QaHjFJglyDapOPo=w2400',
+    'B': 'https://lh3.googleusercontent.com/pw/AP1GczM0Uz8VCyR8ruNPJ88UJ1urgtI7vdhyFM41cZ8G9IM60V0pUjlAp0Fys4aFBbIO5Xr6fe-_4oZSj0cSRQJi4V9CbnpY47paQuU180TG7LHbDHKOWkc=w2400',
+    'K': 'https://lh3.googleusercontent.com/pw/AP1GczO7pDlddvCnvzXJitGQjpN0wbySshP4npcfu_uv1QQewyO-MxojEjVXpodslk6veZM1Se9VzDk0teao8vJd4Z8jqvxqrsCWWFPPM7f595lENdIkVgA=w2400',
+    'Q': 'https://lh3.googleusercontent.com/pw/AP1GczO5DlHz7J4DbvpqAw5DC1tblUMeoBDCTWeZm4OHOug96nxSJIng71K8wuKIFXeXO1kCC1p3xqmg0iBpyCZ94QHL7z_86pjkV-sXzzFm-MZDPi3bMGs=w2400',
+    'P': 'https://lh3.googleusercontent.com/pw/AP1GczMrEbAI7e2kKKKs73OaxYpp4_0NGGZXTeae36D4wi4uMXZf39HrsJ_TdpWMNCJgXnDYjtMNNGJTDpwRZhTQamxTliGvtBZKniTXPiNSEDdrHsoTXDI=w2400'
+  };
 
-            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+  function speak(message) {
+    const utterance = new SpeechSynthesisUtterance(message);
+    speechSynthesis.speak(utterance);
+  }
 
-            ['', '', '', '', '', '', '', ''],
+  function GameControls({ onStartGame, onRestartGame, checkmate, toggleVoice, voiceEnabled }) {
+    return (
+      <div>
+        <button onClick={onStartGame}>Start Game</button>
+        <button onClick={onRestartGame}>Restart Game</button>
+        <button onClick={toggleVoice}>
+          {voiceEnabled ? 'Disable Voice' : 'Enable Voice'}
+        </button>
+        {checkmate && <h1>Checkmate!</h1>}
+      </div>
+    );
+  }
 
-            ['', '', '', '', '', '', '', ''],
+  function Game() {
+    const [game, setGame] = React.useState(initialGameState);
+    const [selectedSquare, setSelectedSquare] = React.useState(null);
+    const [turn, setTurn] = React.useState('white');
+    const [gameStarted, setGameStarted] = React.useState(false);
+    const [checkmate, setCheckmate] = React.useState(false);
+    const [voiceEnabled, setVoiceEnabled] = React.useState(false);
 
-            ['', '', '', '', '', '', '', ''],
+    function toggleVoice() {
+      setVoiceEnabled(prev => !prev);
+    }
 
-            ['', '', '', '', '', '', '', ''],
+    function startGame() {
+      setGameStarted(true);
+      setCheckmate(false);
+    }
 
-            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+    function restartGame() {
+      setGame(initialGameState);
+      setSelectedSquare(null);
+      setTurn('white');
+      setGameStarted(false);
+      setCheckmate(false);
+      window.speechSynthesis.cancel();
+    }
 
-            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+    function handleClick(row, col) {
+      if (checkmate || !gameStarted) return;
 
-        ];
- 
-          // Mapping of chess pieces to their respective image URLs
-    const pieceImages = {
-      'r': 'https://lh3.googleusercontent.com/pw/AP1GczOvRtC-7SL1mmJYpnPoJU5yRfIh0IrGq0FA9cYsQIASfcEW93qf5wTYnbPLT_s9yf-_2Jmptbg7uBHRD1hb7L9ZJJ6ySGkgz_DcL5UCfZ70Wq06ARI=w2400',
-      'n': 'https://lh3.googleusercontent.com/pw/AP1GczP8ohY0rE39TVx5wod30REkAcD4UtrbO8cQYsxvKYql8IYK1JpadhQY6jcIfl9UJ5yCuk-JLSU8sWj5ldmg9JoPTlM99pytizseRpCrkMEkuJ-IvRQ=w2400',
-      'b': 'https://lh3.googleusercontent.com/pw/AP1GczMa2nl5Qz0vOTHJEUTHtc5e_TZn1QFD4JVbgRK8lyKrFtqqgIaPlFhHJpSyyk1Tt076k02AThx4vxv0rPdCvwovNAJBQz_Fx_eCS5JP5QdzTM8biGU=w2400',
-      'k': 'https://lh3.googleusercontent.com/pw/AP1GczM9BqmjtBVG1l1TgMPc4G1WvOl0yjdPT02eGlRHgzjpaAMwudY2S55e_OOchSjBDiVppcHnJY2xg7VE5P-g-wJLxoM_MwYlc5xLjE2fDskh9D4yRp8=w2400',
-      'q': 'https://lh3.googleusercontent.com/pw/AP1GczPzmtessAqzm6vT8bRi5mK0aHCoU81w37oV1YPFOAWSisb7jFaAzTHk0HDOlSkuDtf1X6ryEOmGKbhn26Crei1Z8Rwozw3qtC-PvvXku4pAv6LL_t4=w2400',
-      'p': 'https://lh3.googleusercontent.com/pw/AP1GczOUjQkU3ZX1W0n6TvokrFu4QLJjf7EQ-xAiBRnDyr1JFvY5OTT78waWlB07C1q2WapggEMbXCgiwlQg5nao5oCFrzfKRLE1nYOrHhW4fZBu8c7Q6x8=w2400',
-      'R': 'https://lh3.googleusercontent.com/pw/AP1GczMKfvruSyDmtY0_L5dkiCWVrKFeQQl1cCvyGt-dJp1BU0lKvWwevV_pu8LI-KuOkqxuHg4Dr3YtMYndhZcrB31ENXpNIwyL3svkG6JrBb1F8gk402Q=w2400',
-      'N': 'https://lh3.googleusercontent.com/pw/AP1GczNoQjKq9a3tj9BiT7be-emPWPsRqx5eD9SaUEjuPAzBu_0o5lLtsLcjTbiDDhgVtelq-QdSbt4RyfWhYIttOFfqsUv4MLlSTCF4QaHjFJglyDapOPo=w2400',
-      'B': 'https://lh3.googleusercontent.com/pw/AP1GczM0Uz8VCyR8ruNPJ88UJ1urgtI7vdhyFM41cZ8G9IM60V0pUjlAp0Fys4aFBbIO5Xr6fe-_4oZSj0cSRQJi4V9CbnpY47paQuU180TG7LHbDHKOWkc=w2400',
-      'K': 'https://lh3.googleusercontent.com/pw/AP1GczO7pDlddvCnvzXJitGQjpN0wbySshP4npcfu_uv1QQewyO-MxojEjVXpodslk6veZM1Se9VzDk0teao8vJd4Z8jqvxqrsCWWFPPM7f595lENdIkVgA=w2400',
-      'Q': 'https://lh3.googleusercontent.com/pw/AP1GczO5DlHz7J4DbvpqAw5DC1tblUMeoBDCTWeZm4OHOug96nxSJIng71K8wuKIFXeXO1kCC1p3xqmg0iBpyCZ94QHL7z_86pjkV-sXzzFm-MZDPi3bMGs=w2400',
-      'P': 'https://lh3.googleusercontent.com/pw/AP1GczMrEbAI7e2kKKKs73OaxYpp4_0NGGZXTeae36D4wi4uMXZf39HrsJ_TdpWMNCJgXnDYjtMNNGJTDpwRZhTQamxTliGvtBZKniTXPiNSEDdrHsoTXDI=w2400'
+      if (selectedSquare) {
+        const [selectedRow, selectedCol] = selectedSquare;
+        const piece = game[selectedRow][selectedCol];
+
+        if ((turn === 'white' && piece === piece.toUpperCase()) || (turn === 'black' && piece === piece.toLowerCase())) {
+          if (isValidMove(piece, selectedRow, selectedCol, row, col, game)) {
+            const newGame = game.map(r => r.slice());
+            newGame[row][col] = piece;
+            newGame[selectedRow][selectedCol] = '';
+
+            if (voiceEnabled) {
+              const from = `${String.fromCharCode(97 + selectedCol)}${8 - selectedRow}`;
+              const to = `${String.fromCharCode(97 + col)}${8 - row}`;
+              speak(`${turn.charAt(0).toUpperCase() + turn.slice(1)} moved ${piece} from ${from} to ${to}`);
+            }
+
+            setGame(newGame);
+            setTurn(turn === 'white' ? 'black' : 'white');
+
+            if (isCheckmate(newGame, turn)) {
+              setCheckmate(true);
+              if (voiceEnabled) {
+                speak("Checkmate!");
+              }
+            }
+          }
+        }
+        setSelectedSquare(null);
+      } else {
+        if (game[row][col] && ((turn === 'white' && game[row][col] === game[row][col].toUpperCase()) || (turn === 'black' && game[row][col] === game[row][col].toLowerCase()))) {
+          setSelectedSquare([row, col]);
+        }
+      }
+    }
+
+    return (
+      <div>
+        <GameControls
+          onStartGame={startGame}
+          onRestartGame={restartGame}
+          checkmate={checkmate}
+          toggleVoice={toggleVoice}
+          voiceEnabled={voiceEnabled}
+        />
+        <h2>{gameStarted && !checkmate ? `${turn.charAt(0).toUpperCase() + turn.slice(1)}'s Turn` : 'Game not started'}</h2>
+        {gameStarted && (
+          <Board game={game} onSquareClick={handleClick} selectedSquare={selectedSquare} />
+        )}
+      </div>
+    );
+  }
+
+  function Board({ game, onSquareClick, selectedSquare }) {
+    return (
+      <div>
+        {game.map((row, rowIndex) => (
+          <div key={rowIndex} style={{ display: 'flex' }}>
+            {row.map((value, colIndex) => (
+              <Square
+                key={colIndex}
+                value={value}
+                onClick={() => onSquareClick(rowIndex, colIndex)}
+                isLight={(rowIndex + colIndex) % 2 === 0}
+                isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function Square({ value, onClick, isLight, isSelected }) {
+    const squareStyle = {
+      width: '80px',
+      height: '80px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      cursor: 'pointer',
+      backgroundColor: isSelected ? '#080F0F' : (isLight ? '#EDC79B' : '#D3745F'),
+      border: '1px solid #3E3E3D'
     };
 
- 
-        function speak(message) {
-
-            const utterance = new SpeechSynthesisUtterance(message);
-
-            speechSynthesis.speak(utterance);
-
-        }
- 
-        function GameControls({ onStartGame, onRestartGame, checkmate, toggleVoice, voiceEnabled }) {
-
-            return (
-<div>
-<button onClick={onStartGame}>Start Game</button>
-<button onClick={onRestartGame}>Restart Game</button>
-<button onClick={toggleVoice}>
-
-                        {voiceEnabled ? 'Disable Voice' : 'Enable Voice'}
-</button>
-
-                    {checkmate && <h1>Checkmate!</h1>}
-</div>
-
-            );
-
-        }
- 
-        function Game() {
-
-            const [game, setGame] = React.useState(initialGameState);
-
-            const [selectedSquare, setSelectedSquare] = React.useState(null);
-
-            const [turn, setTurn] = React.useState('white');
-
-            const [gameStarted, setGameStarted] = React.useState(false);
-
-            const [checkmate, setCheckmate] = React.useState(false);
-
-            const [voiceEnabled, setVoiceEnabled] = React.useState(false);
- 
-            function toggleVoice() {
-
-                setVoiceEnabled(prev => !prev);
-
-            }
- 
-            function startGame() {
-
-                setGameStarted(true);
-
-                setCheckmate(false);
-
-            }
- 
-            function restartGame() {
-
-                setGame(initialGameState);
-
-                setSelectedSquare(null);
-
-                setTurn('white');
-
-                setGameStarted(false);
-
-                setCheckmate(false);
-
-                window.speechSynthesis.cancel(); // Cancel any ongoing speech
-
-            }
- 
-            function handleClick(row, col) {
-
-                if (checkmate || !gameStarted) return; // Disable moves if checkmate or game hasn't started
- 
-                if (selectedSquare) {
-
-                    const [selectedRow, selectedCol] = selectedSquare;
-
-                    const piece = game[selectedRow][selectedCol];
- 
-                    // Validate if it's the correct turn
-
-                    if ((turn === 'white' && piece === piece.toUpperCase()) || (turn === 'black' && piece === piece.toLowerCase())) {
-
-                        // Assuming isValidMove is a function you will implement to check valid moves
-
-                        if (isValidMove(piece, selectedRow, selectedCol, row, col, game)) {
-
-                            const newGame = game.map(r => r.slice());
-
-                            newGame[row][col] = piece;
-
-                            newGame[selectedRow][selectedCol] = '';
- 
-                            // Announce the move
-
-                            if (voiceEnabled) {
-
-                                const from = `${String.fromCharCode(97 + selectedCol)}${8 - selectedRow}`;
-
-                                const to = `${String.fromCharCode(97 + col)}${8 - row}`;
-
-                                speak(`${turn.charAt(0).toUpperCase() + turn.slice(1)} moved ${piece} from ${from} to ${to}`);
-
-                            }
- 
-                            setGame(newGame);
-
-                            setTurn(turn === 'white' ? 'black' : 'white');
- 
-                            // Check for checkmate condition (implement this function)
-
-                            if (isCheckmate(newGame, turn)) {
-
-                                setCheckmate(true);
-
-                                if (voiceEnabled) {
-
-                                    speak("Checkmate!");
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                    setSelectedSquare(null);
-
-                } else {
-
-                    if (game[row][col] && ((turn === 'white' && game[row][col] === game[row][col].toUpperCase()) || (turn === 'black' && game[row][col] === game[row][col].toLowerCase()))) {
-
-                        setSelectedSquare([row, col]);
-
-                    }
-
-                }
-
-            }
- 
-            return (
-<div>
-<GameControls
-
-                        onStartGame={startGame}
-
-                        onRestartGame={restartGame}
-
-                        checkmate={checkmate}
-
-                        toggleVoice={toggleVoice}
-
-                        voiceEnabled={voiceEnabled}
-
-                    />
-<h2>{gameStarted && !checkmate ? `${turn.charAt(0).toUpperCase() + turn.slice(1)}'s Turn` : 'Game not started'}</h2>
-
-                    {gameStarted && (
-<Board game={game} onSquareClick={handleClick} selectedSquare={selectedSquare} />
-
-                    )}
-</div>
-
-            );
- 
-   }
- 
-        function Board({ game, onSquareClick, selectedSquare }) {
-
-            return (
-<div>
-
-                    {game.map((row, rowIndex) => (
-<div key={rowIndex} style={{ display: 'flex' }}>
-
-                            {row.map((value, colIndex) => (
-<Square
-
-                                    key={colIndex}
-
-                                    value={value}
-
-                                    onClick={() => onSquareClick(rowIndex, colIndex)}
-
-                                    isLight={(rowIndex + colIndex) % 2 === 0}
-
-                                    isSelected={selectedSquare && selectedSquare[0] === rowIndex && selectedSquare[1] === colIndex}
-
-                                />
-
-                            ))}
-</div>
-
-                    ))}
-</div>
-
-            );
-
-        }
- 
-        function Square({ value, onClick, isLight, isSelected }) {
-
-            const squareStyle = {
-
-                width: '80px',
-
-                height: '80px',
-
-                display: 'flex',
-
-                justifyContent: 'center',
-
-                alignItems: 'center',
-
-                cursor: 'pointer',
-
-                backgroundColor: isSelected ? '#080F0F' : (isLight ? '#EDC79B' : '#D3745F'),
-
-                border: '1px solid #3E3E3D'
-
-            };
- 
-            return (
-<button style={squareStyle} onClick={onClick}>
-
-                    {value ? <img src={pieceImages[value]} alt={value} style={{ width: '60px', height: '80px' }} /> : null}
-</button>
-
-            );
-
-        }
- 
-        // Placeholder for valid move check
-
-        function isValidMove(piece, fromRow, fromCol, toRow, toCol, game) {
-
-            // Implement your piece movement logic here
-
-            return true; // Temporary: Replace with actual movement logic
-
-        }
- 
-        // Placeholder for checkmate check
-
-        function isCheckmate(game, turn) {
-
-            // Implement your checkmate logic here
-
-            return false; // Temporary: Replace with actual checkmate logic
-
-        }
- 
-        const root = ReactDOM.createRoot(document.getElementById("root"));
-
-        root.render(<Game />);
+    return (
+      <button style={squareStyle} onClick={onClick}>
+        {value ? <img src={pieceImages[value]} alt={value} style={{ width: '60px', height: '80px' }} /> : null}
+      </button>
+    );
+  }
+
+  function isValidMove(piece, fromRow, fromCol, toRow, toCol, game) {
+    // Placeholder move validation logic for now
+    // You should add real piece-specific movement rules for each chess piece.
+    return true; // Temporary: Replace with actual movement logic
+  }
+
+  function isCheckmate(game, turn) {
+    // Placeholder checkmate logic, currently returns false.
+    // You can add the logic for detecting checkmate here.
+    return false;
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<Game />);
 </script>
 </body>
 </html>
-
- 
