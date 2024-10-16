@@ -106,7 +106,7 @@
 
         function handleMovement(event) {
             if (isPaused) return;  
-            const step = 10;
+            const step = 35;
             if (event.key === 'ArrowLeft' || event.key === 'a') {
                 player.left = Math.max(0, player.left - step);
             } else if (event.key === 'ArrowRight' || event.key === 'd') {
