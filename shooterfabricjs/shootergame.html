@@ -63,6 +63,10 @@
         const startButton = document.getElementById('startButton');
         const restartButton = document.getElementById('restartButton');
         const pauseButton = document.getElementById('pauseButton');
+
+        // Load audio files
+        const shootSound = new Audio('pew.wav');
+        const explodeSound = new Audio('explode.wav');
         
         function updateScore(points) {
             score += points;
@@ -116,6 +120,10 @@
 
         function shootBullet() {
             if (isPaused) return;  
+            
+            // Play shooting sound
+            shootSound.play();
+            
             const bullet = new fabric.Circle({
                 left: player.left + player.width / 2 - 5,
                 top: player.top - 10,
@@ -190,6 +198,10 @@
                         targetIntervals.splice(targetIndex, 1);
                     }
                     targets = targets.filter(t => t !== target);
+
+                    // Play explosion sound
+                    explodeSound.play();
+
                     updateScore(10);
                 }
             });
