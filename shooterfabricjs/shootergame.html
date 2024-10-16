@@ -64,11 +64,10 @@
         const restartButton = document.getElementById('restartButton');
         const pauseButton = document.getElementById('pauseButton');
 
-        // Load audio files
         const shootSound = new Audio('pew.mp3');
         const explodeSound = new Audio('explode.mp3');
-        const missSound = new Audio('error.mp3');  // Load the miss sound
-        
+        const missSound = new Audio('error.mp3');  
+
         function updateScore(points) {
             score += points;
             scoreDisplay.innerText = `Score: ${score}`;
@@ -119,29 +118,37 @@
             canvas.renderAll();
         }
 
-        function shootBullet() {
+        function shootLaser() {
             if (isPaused) return;  
+
             
-            // Play shooting sound
             shootSound.play();
+
             
-            const bullet = new fabric.Circle({
-                left: player.left + player.width / 2 - 5,
-                top: player.top - 10,
-                fill: '#B91372',
-                radius: 5,
-                selectable: false
+            const laser = new fabric.Rect({
+                left: player.left + player.width / 2 - 2.5, 
+                top: player.top - 30,  
+                fill: '#F39237', 
+                width: 5,  
+                height: 30,  
+                selectable: false,
+                shadow: {  
+                    color: 'rgba(255, 0, 0, 0.5)',  
+                    blur: 10,                        
+                    offsetX: 0,                      
+                    offsetY: 0                       
+                }
             });
-            canvas.add(bullet);
+            canvas.add(laser);
 
             const interval = setInterval(() => {
-                if (isPaused) return;  
-                bullet.top -= 5;
-                if (bullet.top < 0) {
+                if (isPaused) return;
+                laser.top -= 15;  
+                if (laser.top < 0) {
                     clearInterval(interval);
-                    canvas.remove(bullet);
+                    canvas.remove(laser);
                 } else {
-                    checkCollision(bullet, interval);
+                    checkCollision(laser, interval);
                 }
                 canvas.renderAll();
             }, 20);
@@ -170,7 +177,6 @@
                     missedTargets++;
                     updateMissedTargets();
 
-                    // Play miss sound when a target is missed
                     missSound.play();
 
                     checkGameOver();
@@ -186,17 +192,17 @@
             }, 2000);
         }
 
-        function checkCollision(bullet, bulletInterval) {
+        function checkCollision(laser, laserInterval) {
             targets.forEach(target => {
                 if (
-                    bullet.left < target.left + target.width &&
-                    bullet.left + bullet.radius * 2 > target.left &&
-                    bullet.top < target.top + target.height &&
-                    bullet.top + bullet.radius * 2 > target.top
+                    laser.left < target.left + target.width &&
+                    laser.left + laser.width > target.left &&
+                    laser.top < target.top + target.height &&
+                    laser.top + laser.height > target.top
                 ) {
-                    canvas.remove(bullet);
+                    canvas.remove(laser);
                     canvas.remove(target);
-                    clearInterval(bulletInterval);
+                    clearInterval(laserInterval);
                     const targetIndex = targets.indexOf(target);
                     if (targetIndex !== -1) {
                         clearInterval(targetIntervals[targetIndex]);
@@ -204,7 +210,6 @@
                     }
                     targets = targets.filter(t => t !== target);
 
-                    // Play explosion sound
                     explodeSound.play();
 
                     updateScore(10);
@@ -239,7 +244,7 @@
             if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'w', 'a', 's', 'd'].includes(event.key)) {
                 handleMovement(event);
             } else if (event.key === ' ') {
-                shootBullet();
+                shootLaser();  
             }
         }
 
@@ -272,6 +277,8 @@
             player.set({ left: newWidth / 2 - player.width / 2, top: newHeight - 50 });
             canvas.renderAll();
         });
+
+        initPlayer();
     </script>
 </body>
 </html>
