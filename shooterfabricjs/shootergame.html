@@ -67,6 +67,7 @@
         // Load audio files
         const shootSound = new Audio('pew.mp3');
         const explodeSound = new Audio('explode.mp3');
+        const missSound = new Audio('error.mp3');  // Load the miss sound
         
         function updateScore(points) {
             score += points;
@@ -168,6 +169,10 @@
                     targets = targets.filter(t => t !== target);
                     missedTargets++;
                     updateMissedTargets();
+
+                    // Play miss sound when a target is missed
+                    missSound.play();
+
                     checkGameOver();
                 }
                 canvas.renderAll();
