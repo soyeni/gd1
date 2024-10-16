@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shooter Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/fabric@5.0.0/dist/fabric.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 1px solid #000;
+        }
+        #score, #missedTargetsDisplay {
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+            color: #000;
+            margin: 5px;
+        }
+        #controls {
+            margin: 10px;
+        }
+        #startButton, #restartButton, #pauseButton {
+            font-size: 16px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        #gameArea {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="controls">
+            <button id="startButton">Start</button>
+            <button id="restartButton">Restart</button>
+            <button id="pauseButton">Pause</button>
+        </div>
+        <div id="score">Score: 0</div>
+        <div id="missedTargetsDisplay">Targets Missed: 0</div>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = new fabric.Canvas('canvas');
+        const width = window.innerWidth;
+        const height = window.innerHeight * 0.8;
+        let player, score = 0, targets = [], targetSpeed = 2, targetIntervals = [], gameActive = false, isPaused = false;
+        let missedTargets = 0;
+        const maxMisses = 5;
+        const scoreDisplay = document.getElementById('score');
+        const missedTargetsDisplay = document.getElementById('missedTargetsDisplay');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const pauseButton = document.getElementById('pauseButton');
+        
+        function updateScore(points) {
+            score += points;
+            scoreDisplay.innerText = `Score: ${score}`;
+        }
+
+        function updateMissedTargets() {
+            missedTargetsDisplay.innerText = `Targets Passed: ${missedTargets}`;
+        }
+
+        function initPlayer() {
+            player = new fabric.Rect({
+                left: width / 2 - 25,
+                top: height - 50,
+                fill: 'blue',
+                width: 50,
+                height: 20,
+                selectable: false
+            });
+            canvas.add(player);
+        }
+
+        function resetGame() {
+            score = 0;
+            missedTargets = 0;
+            targetSpeed = 2;
+            updateScore(0);
+            updateMissedTargets();
+            canvas.clear();
+            targets.forEach(target => canvas.remove(target));
+            targets = [];
+            targetIntervals.forEach(clearInterval);
+            targetIntervals = [];
+            initPlayer();
+        }
+
+        function handleMovement(event) {
+            if (isPaused) return;  
+            const step = 10;
+            if (event.key === 'ArrowLeft' || event.key === 'a') {
+                player.left = Math.max(0, player.left - step);
+            } else if (event.key === 'ArrowRight' || event.key === 'd') {
+                player.left = Math.min(width - player.width, player.left + step);
+            } else if (event.key === 'ArrowUp' || event.key === 'w') {
+                player.top = Math.max(0, player.top - step);
+            } else if (event.key === 'ArrowDown' || event.key === 's') {
+                player.top = Math.min(height - player.height, player.top + step);
+            }
+            canvas.renderAll();
+        }
+
+        function shootBullet() {
+            if (isPaused) return;  
+            const bullet = new fabric.Circle({
+                left: player.left + player.width / 2 - 5,
+                top: player.top - 10,
+                fill: 'red',
+                radius: 5,
+                selectable: false
+            });
+            canvas.add(bullet);
+
+            const interval = setInterval(() => {
+                if (isPaused) return;  
+                bullet.top -= 5;
+                if (bullet.top < 0) {
+                    clearInterval(interval);
+                    canvas.remove(bullet);
+                } else {
+                    checkCollision(bullet, interval);
+                }
+                canvas.renderAll();
+            }, 20);
+        }
+
+        function createTarget() {
+            if (isPaused) return;  
+            const target = new fabric.Rect({
+                left: Math.random() * (width - 50),
+                top: 0,
+                fill: 'green',
+                width: 50,
+                height: 20,
+                selectable: false
+            });
+            canvas.add(target);
+            targets.push(target);
+
+            const targetInterval = setInterval(() => {
+                if (isPaused) return;  
+                target.top += targetSpeed;
+                if (target.top > height) {
+                    clearInterval(targetInterval);
+                    canvas.remove(target);
+                    targets = targets.filter(t => t !== target);
+                    missedTargets++;
+                    updateMissedTargets();
+                    checkGameOver();
+                }
+                canvas.renderAll();
+            }, 20);
+            targetIntervals.push(targetInterval);
+        }
+
+        function spawnTargets() {
+            setInterval(() => {
+                if (gameActive && !isPaused) createTarget();
+            }, 2000);
+        }
+
+        function checkCollision(bullet, bulletInterval) {
+            targets.forEach(target => {
+                if (
+                    bullet.left < target.left + target.width &&
+                    bullet.left + bullet.radius * 2 > target.left &&
+                    bullet.top < target.top + target.height &&
+                    bullet.top + bullet.radius * 2 > target.top
+                ) {
+                    canvas.remove(bullet);
+                    canvas.remove(target);
+                    clearInterval(bulletInterval);
+                    const targetIndex = targets.indexOf(target);
+                    if (targetIndex !== -1) {
+                        clearInterval(targetIntervals[targetIndex]);
+                        targetIntervals.splice(targetIndex, 1);
+                    }
+                    targets = targets.filter(t => t !== target);
+                    updateScore(10);
+                }
+            });
+        }
+
+        function checkGameOver() {
+            if (missedTargets >= maxMisses) {
+                alert('Game Over! 5 targets passed.');
+                gameActive = false;
+                resetGame();
+            }
+        }
+
+        function startGame() {
+            if (gameActive) return;
+            gameActive = true;
+            resetGame();
+
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+
+            spawnTargets();
+
+            setInterval(() => {
+                if (gameActive && !isPaused) targetSpeed += 0.5;
+            }, 15000);
+        }
+
+        function handleKeyDown(event) {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'w', 'a', 's', 'd'].includes(event.key)) {
+                handleMovement(event);
+            } else if (event.key === ' ') {
+                shootBullet();
+            }
+        }
+
+        function handleKeyUp(event) {
+            canvas.renderAll();
+        }
+
+        function togglePause() {
+            if (!gameActive) return;  
+            isPaused = !isPaused;
+            pauseButton.innerText = isPaused ? 'Resume' : 'Pause';
+        }
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', () => {
+            resetGame();
+            gameActive = false;
+            startGame();
+        });
+        pauseButton.addEventListener('click', togglePause);
+
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+
+        window.addEventListener('resize', () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight * 0.8;
+            canvas.setWidth(newWidth);
+            canvas.setHeight(newHeight);
+            player.set({ left: newWidth / 2 - player.width / 2, top: newHeight - 50 });
+            canvas.renderAll();
+        });
+    </script>
+</body>
+</html>
