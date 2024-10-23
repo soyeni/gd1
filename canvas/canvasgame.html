@@ -29,8 +29,7 @@ var candyCaneAspectRatio = 1 / 3;  // Assuming the candy cane is tall, with a 1:
 var backgroundX = 0;  // Background starting x position
 
 function startGame() {
-    // Make Santa bigger by setting a larger width and height (60x60 instead of 30x30)
-    myGamePiece = new gameObject(60, 60, santaImage, 10, 120, "image"); 
+    myGamePiece = new gameObject(30, 30, santaImage, 10, 120, "image");
     myGamePiece.gravity = 0.05;
     myScore = new gameObject("30px", "Consolas", "black", 280, 40, "text");
     myGameArea.start();
