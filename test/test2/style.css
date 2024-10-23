@@ -47,7 +47,7 @@ nav ul li a {
     margin-bottom: 40px;
 }
 
-/* Cascading grid with rounded squares */
+
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -60,17 +60,17 @@ nav ul li a {
     border-radius: 20px;
     height: 150px;
     width: 100%;
-    /* Ensuring items are always squares */
+
     aspect-ratio: 1 / 1;
     transition: transform 0.3s ease;
 }
 
-/* Random positioning for a cascading look */
+
 .grid-item:nth-child(odd) {
     transform: translateY(50px);
 }
 
-/* Hover effect to add interactivity */
+
 .grid-item:hover {
     transform: scale(1.1);
     background-color: #555;
