@@ -24,8 +24,6 @@ backgroundImage.src = "snow.png";  // Load the background image
 var candyCaneImage = new Image();
 candyCaneImage.src = "/mnt/data/cc.png";  // Path to the candy cane image
 
-var candyCaneAspectRatio = 1 / 3;  // Assuming the candy cane is tall, with a 1:3 width-to-height ratio
-
 var backgroundX = 0;  // Background starting x position
 
 function startGame() {
@@ -146,12 +144,9 @@ function updateGameArea() {
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
 
-        // Calculate the width based on the height to maintain aspect ratio
-        var candyCaneWidth = height * candyCaneAspectRatio;
-
         // Use the candy cane image for the obstacle
-        myObstacles.push(new gameObject(candyCaneWidth, height, candyCaneImage, x, 0, "image")); // Top candy cane
-        myObstacles.push(new gameObject(candyCaneWidth, x - height - gap, candyCaneImage, x, height + gap, "image")); // Bottom candy cane
+        myObstacles.push(new gameObject(30, height, candyCaneImage, x, 0, "image")); // Top candy cane
+        myObstacles.push(new gameObject(30, x - height - gap, candyCaneImage, x, height + gap, "image")); // Bottom candy cane
     }
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
