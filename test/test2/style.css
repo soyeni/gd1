@@ -67,26 +67,3 @@ nav ul li a {
 .grid-item.wide {
     grid-column: span 2;
 }
-
-}
-
-.gallery {
-    padding: 50px;
-    text-align: center;
-}
-
-.gallery h1 {
-    font-size: 36px;
-    margin-bottom: 40px;
-}
-
-.gallery-items {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-}
-
-.gallery-item img {
-    width: 100%;
-    border-radius: 8px;
-}
