@@ -67,7 +67,7 @@ nav ul li a {
 
 /* Random positioning for a cascading look */
 .grid-item:nth-child(odd) {
-    transform: translateY(20px);
+    transform: translateY(50px);
 }
 
 /* Hover effect to add interactivity */
