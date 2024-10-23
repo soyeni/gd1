@@ -21,6 +21,9 @@ santaImage.src = "santa.png";  // Load the Santa image
 var backgroundImage = new Image();
 backgroundImage.src = "snow.png";  // Load the background image
 
+var candyCaneImage = new Image();
+candyCaneImage.src = "cc.png";  // Path to the candy cane image
+
 var backgroundX = 0;  // Background starting x position
 
 function startGame() {
@@ -140,8 +143,10 @@ function updateGameArea() {
         minGap = 50;
         maxGap = 200;
         gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
-        myObstacles.push(new gameObject(10, height, "green", x, 0));
-        myObstacles.push(new gameObject(10, x - height - gap, "green", x, height + gap));
+
+        // Use the candy cane image for the obstacle
+        myObstacles.push(new gameObject(30, height, candyCaneImage, x, 0, "image")); // Top candy cane
+        myObstacles.push(new gameObject(30, x - height - gap, candyCaneImage, x, height + gap, "image")); // Bottom candy cane
     }
     for (i = 0; i < myObstacles.length; i += 1) {
         myObstacles[i].x += -1;
