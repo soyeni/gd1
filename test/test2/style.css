@@ -47,20 +47,17 @@ nav ul li a {
     margin-bottom: 40px;
 }
 
-/* LINEAR LAYOUT: Stacked items */
+/* GRID LAYOUT: Responsive grid items */
 .gallery-grid {
-    display: flex;
-    flex-direction: column; /* Stack items vertically */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px; /* Space between items */
-    align-items: center; /* Center items horizontally */
 }
 
 .grid-item {
     background-color: #333;
     border-radius: 20px;
-    width: 100%; /* Take up full width */
-    max-width: 300px; /* Max width for each square */
-    height: 300px; /* Fixed height to maintain square shape */
+    height: 200px; /* Fixed height for uniformity */
     transition: transform 0.3s ease;
 }
 
@@ -73,14 +70,12 @@ nav ul li a {
 /* RESPONSIVE DESIGN: Adjust size on smaller screens */
 @media (max-width: 768px) {
     .grid-item {
-        max-width: 200px;
-        height: 200px;
+        height: 180px; /* Adjust height for smaller screens */
     }
 }
 
 @media (max-width: 600px) {
     .grid-item {
-        max-width: 150px;
-        height: 150px;
+        height: 150px; /* Further adjust height */
     }
 }
