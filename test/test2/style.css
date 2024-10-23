@@ -47,55 +47,40 @@ nav ul li a {
     margin-bottom: 40px;
 }
 
-/* Cascading grid with rounded squares */
+/* LINEAR LAYOUT: Stacked items */
 .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    grid-gap: 20px; /* Consistent gap to prevent clumping */
-    grid-auto-rows: 150px;
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 20px; /* Space between items */
+    align-items: center; /* Center items horizontally */
 }
 
 .grid-item {
     background-color: #333;
     border-radius: 20px;
-    aspect-ratio: 1 / 1; /* Ensure all items are perfect squares */
+    width: 100%; /* Take up full width */
+    max-width: 300px; /* Max width for each square */
+    height: 300px; /* Fixed height to maintain square shape */
     transition: transform 0.3s ease;
-}
-
-/* Random positioning for a cascading look */
-.grid-item:nth-child(odd) {
-    transform: translateY(20px);
 }
 
 /* Hover effect to add interactivity */
 .grid-item:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     background-color: #555;
 }
 
-/* RESPONSIVE DESIGN: Stacking squares for smaller screens */
-@media (max-width: 1024px) {
-    .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Adjust the min size */
-        grid-auto-rows: 200px;
-    }
-}
-
+/* RESPONSIVE DESIGN: Adjust size on smaller screens */
 @media (max-width: 768px) {
-    .gallery-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Medium screen adjustment */
-        grid-auto-rows: 180px;
+    .grid-item {
+        max-width: 200px;
+        height: 200px;
     }
 }
 
 @media (max-width: 600px) {
-    .gallery-grid {
-        grid-template-columns: 1fr; /* Stacks all grid items in one column */
-        grid-auto-rows: 200px; /* Increase row height for better display on small screens */
-    }
-    
     .grid-item {
-        height: 200px;
-        aspect-ratio: auto; /* Remove aspect ratio constraint */
+        max-width: 150px;
+        height: 150px;
     }
 }
