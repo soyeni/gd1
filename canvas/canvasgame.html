@@ -16,14 +16,17 @@ var myGamePiece;
 var myObstacles = [];
 var myScore;
 var santaImage = new Image();
-santaImage.src = "santa.png";  // Load the uploaded Santa image
+santaImage.src = "santa.png";  // Load the Santa image
+
+var backgroundImage = new Image();
+backgroundImage.src = "snow.png";  // Load the background image
+
+var backgroundX = 0;  // Background starting x position
 
 function startGame() {
     myGamePiece = new gameObject(30, 30, santaImage, 10, 120, "image");
-    
     myGamePiece.gravity = 0.05;
     myScore = new gameObject("30px", "Consolas", "black", 280, 40, "text");
-
     myGameArea.start();
 }
 
@@ -67,10 +70,10 @@ function gameObject(width, height, colorOrImage, x, y, type) {
             ctx.fillText(this.text, this.x, this.y);
         } else if (this.type == "image") {
             // Flip the image horizontally
-            ctx.save(); // Save the current canvas state
-            ctx.scale(-1, 1); // Flip the canvas horizontally
-            ctx.drawImage(this.image, -this.x - this.width, this.y, this.width, this.height); // Draw the image flipped
-            ctx.restore(); // Restore the canvas state
+            ctx.save();
+            ctx.scale(-1, 1); // Flip horizontally
+            ctx.drawImage(this.image, -this.x - this.width, this.y, this.width, this.height);
+            ctx.restore();
         } else {
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -117,6 +120,17 @@ function updateGameArea() {
         } 
     }
     myGameArea.clear();
+
+    // Update background movement
+    backgroundX -= 1; // Move the background left
+    if (backgroundX <= -myGameArea.canvas.width) {
+        backgroundX = 0; // Reset background to create a loop
+    }
+
+    // Draw the looping background
+    myGameArea.context.drawImage(backgroundImage, backgroundX, 0, myGameArea.canvas.width, myGameArea.canvas.height);
+    myGameArea.context.drawImage(backgroundImage, backgroundX + myGameArea.canvas.width, 0, myGameArea.canvas.width, myGameArea.canvas.height);
+
     myGameArea.frameNo += 1;
     if (myGameArea.frameNo == 1 || everyinterval(150)) {
         x = myGameArea.canvas.width;
@@ -147,6 +161,7 @@ function everyinterval(n) {
 function accelerate(n) {
     myGamePiece.gravity = n;
 }
+
 </script>
 
 <br>
