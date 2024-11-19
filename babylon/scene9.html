@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Babylon.js Village</title>
+    <title>Enhanced Babylon.js Village with Shooting Stars</title>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
     <script src="https://cdn.babylonjs.com/serializers/babylon.glTFSerializer.js"></script>
@@ -82,6 +82,30 @@
             createOrbitingPlanet(0.7, "venusmap.jpg", 5, 0.008);
             createOrbitingPlanet(1, "Earth_Texture_Full.png", 7, 0.005);
 
+            // Shooting star function
+            function createShootingStar() {
+                const shootingStar = new BABYLON.ParticleSystem("shootingStar", 100, scene);
+                shootingStar.particleTexture = new BABYLON.Texture("flare.png", scene);
+                
+                // Start position of the shooting star
+                shootingStar.emitter = new BABYLON.Vector3(Math.random() * 500 - 250, Math.random() * 200 - 100, Math.random() * 500 - 250);
+                
+                shootingStar.minEmitPower = 20;
+                shootingStar.maxEmitPower = 30;
+                shootingStar.emitRate = 1;
+                shootingStar.gravity = new BABYLON.Vector3(0, -9.8, 0);
+                
+                shootingStar.color1 = new BABYLON.Color4(1, 1, 1, 1);
+                shootingStar.color2 = new BABYLON.Color4(1, 1, 1, 0);
+                
+                // Start and stop the shooting star quickly to simulate a brief appearance
+                shootingStar.start();
+                setTimeout(() => shootingStar.stop(), 500);
+            }
+
+            // Trigger a shooting star at intervals
+            setInterval(createShootingStar, 5000);
+
             return scene;
         };
 
@@ -99,3 +123,4 @@
     </script>
 </body>
 </html>
+
