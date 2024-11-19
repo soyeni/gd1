@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width: device-width, initial-scale=1.0">
     <title>Enhanced Babylon.js Village with Shooting Stars</title>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylon.glTF2FileLoader.js"></script>
@@ -45,6 +45,32 @@
             const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
             sunMaterial.emissiveTexture = new BABYLON.Texture("sun.jpg", scene);
             sun.material = sunMaterial;
+
+            // Sun rotation
+            scene.registerBeforeRender(() => {
+                sun.rotation.y += 0.001;
+            });
+
+            // Sun particle effect
+            const sunParticles = new BABYLON.ParticleSystem("sunParticles", 2000, scene);
+            sunParticles.emitter = sun.position;
+            sunParticles.particleTexture = new BABYLON.Texture("textures/flare.png", scene);
+            sunParticles.minEmitBox = new BABYLON.Vector3(-0.5, -0.5, -0.5);
+            sunParticles.maxEmitBox = new BABYLON.Vector3(0.5, 0.5, 0.5);
+            sunParticles.color1 = new BABYLON.Color4(1, 0.5, 0, 1);
+            sunParticles.color2 = new BABYLON.Color4(1, 0.1, 0, 1);
+            sunParticles.minSize = 0.1;
+            sunParticles.maxSize = 0.5;
+            sunParticles.minLifeTime = 1.0;
+            sunParticles.maxLifeTime = 3.0;
+            sunParticles.emitRate = 500;
+            sunParticles.blendMode = BABYLON.ParticleSystem.BLENDMODE_ONEONE;
+            sunParticles.direction1 = new BABYLON.Vector3(0, 0, 0);
+            sunParticles.direction2 = new BABYLON.Vector3(0, 0, 0);
+            sunParticles.minEmitPower = 0.1;
+            sunParticles.maxEmitPower = 0.5;
+            sunParticles.updateSpeed = 0.01;
+            sunParticles.start();
 
             // Day-night cycle
             let dayTime = 0;
@@ -123,4 +149,3 @@
     </script>
 </body>
 </html>
-
