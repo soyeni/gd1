@@ -43,7 +43,7 @@
             const sun = BABYLON.MeshBuilder.CreateSphere("sun", { diameter: 1.5 }, scene);
             sun.position = new BABYLON.Vector3(0, 8, 0);
             const sunMaterial = new BABYLON.StandardMaterial("sunMaterial", scene);
-            sunMaterial.emissiveTexture = new BABYLON.Texture("https://www.solarsystemscope.com/textures/download/8k_sun.jpg", scene);
+            sunMaterial.emissiveTexture = new BABYLON.Texture("sun.jpg", scene);
             sun.material = sunMaterial;
 
             // Day-night cycle
@@ -78,9 +78,9 @@
             }
 
             // Planets with trails
-            createOrbitingPlanet(0.5, "https://smd-cms.nasa.gov/wp-content/uploads/2023/09/PIA17386.jpg", 3, 0.01);
-            createOrbitingPlanet(0.7, "https://planetpixelemporium.com/download/download.php?venusmap.jpg", 5, 0.008);
-            createOrbitingPlanet(1, "https://planet-texture-maps.fandom.com/wiki/Special:FilePath/Earth_Texture_Full.png", 7, 0.005);
+            createOrbitingPlanet(0.5, "merc.jpg", 3, 0.01);
+            createOrbitingPlanet(0.7, "venusmap.jpg", 5, 0.008);
+            createOrbitingPlanet(1, "Earth_Texture_Full.png", 7, 0.005);
 
             return scene;
         };
