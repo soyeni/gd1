@@ -1,11 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Babylon.js Chessboard with Rules</title>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-    <script src="https://cdn.babylonjs.com/stlExporter/babylon.stlExporter.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -23,16 +20,10 @@
             border-radius: 5px;
             box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-        #exportButton {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-        }
     </style>
 </head>
 <body>
     <div id="ui">Turn: <span id="turnIndicator">White</span></div>
-    <button id="exportButton">Export STL</button>
     <canvas id="renderCanvas" style="width: 100%; height: 100%;"></canvas>
     <script>
         const canvas = document.getElementById("renderCanvas");
@@ -41,30 +32,33 @@
         const createScene = () => {
             const scene = new BABYLON.Scene(engine);
 
-            // Camera
+            // Camera and Light
             const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 15, BABYLON.Vector3.Zero(), scene);
             camera.attachControl(canvas, true);
-
-            // Light
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
 
             // Chessboard
             const boardSize = 8;
             const tileSize = 1;
+            const board = Array(8).fill(null).map(() => Array(8).fill(null));
+            const pieces = [];
 
-            // Create chessboard tiles
             for (let row = 0; row < boardSize; row++) {
                 for (let col = 0; col < boardSize; col++) {
                     const tile = BABYLON.MeshBuilder.CreateBox(`tile${row}_${col}`, { size: tileSize }, scene);
-                    tile.position = new BABYLON.Vector3(row - boardSize / 2 + 0.5, 0, col - boardSize / 2 + 0.5);
+                    tile.position = new BABYLON.Vector3(row - 3.5, 0, col - 3.5);
+                    tile.isTile = true; // Custom property to distinguish tiles
+                    tile.row = row;
+                    tile.col = col;
+
                     const tileMaterial = new BABYLON.StandardMaterial(`tileMat${row}_${col}`, scene);
                     tileMaterial.diffuseColor = (row + col) % 2 === 0 ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 0, 0);
                     tile.material = tileMaterial;
                 }
             }
 
-            // Function to create a piece
-            const createPiece = (type, x, z, color) => {
+            // Create chess pieces
+            const createPiece = (type, row, col, color) => {
                 let piece;
                 switch (type) {
                     case "pawn":
@@ -87,61 +81,96 @@
                         break;
                 }
 
-                // Position and color the piece
-                piece.position = new BABYLON.Vector3(x - 3.5, 0.5, z - 3.5);
-                const pieceMaterial = new BABYLON.StandardMaterial(type + "Mat", scene);
-                pieceMaterial.diffuseColor = color === "white" ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 0, 0);
-                piece.material = pieceMaterial;
+                piece.position = new BABYLON.Vector3(row - 3.5, 0.5, col - 3.5);
+                piece.color = color;
+                piece.type = type;
+                piece.row = row;
+                piece.col = col;
 
+                const material = new BABYLON.StandardMaterial(`${type}Mat`, scene);
+                material.diffuseColor = color === "white" ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 0, 0);
+                piece.material = material;
+
+                pieces.push(piece);
+                board[row][col] = piece;
                 return piece;
             };
 
-            // Add all pieces
-            const pieces = [];
+            // Initialize the board
+            const initializeBoard = () => {
+                // Add pawns
+                for (let i = 0; i < 8; i++) {
+                    createPiece("pawn", i, 1, "white");
+                    createPiece("pawn", i, 6, "black");
+                }
 
-            // Add pawns
-            for (let i = 0; i < 8; i++) {
-                pieces.push(createPiece("pawn", i, 1, "white"));
-                pieces.push(createPiece("pawn", i, 6, "black"));
-            }
+                // Add other pieces
+                const backRow = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"];
+                backRow.forEach((type, i) => {
+                    createPiece(type, i, 0, "white");
+                    createPiece(type, i, 7, "black");
+                });
+            };
 
-            // Add rooks
-            pieces.push(createPiece("rook", 0, 0, "white"));
-            pieces.push(createPiece("rook", 7, 0, "white"));
-            pieces.push(createPiece("rook", 0, 7, "black"));
-            pieces.push(createPiece("rook", 7, 7, "black"));
+            initializeBoard();
 
-            // Add knights
-            pieces.push(createPiece("knight", 1, 0, "white"));
-            pieces.push(createPiece("knight", 6, 0, "white"));
-            pieces.push(createPiece("knight", 1, 7, "black"));
-            pieces.push(createPiece("knight", 6, 7, "black"));
+            // Turn logic
+            let isWhiteTurn = true;
+            const turnIndicator = document.getElementById("turnIndicator");
+            let selectedPiece = null;
 
-            // Add bishops
-            pieces.push(createPiece("bishop", 2, 0, "white"));
-            pieces.push(createPiece("bishop", 5, 0, "white"));
-            pieces.push(createPiece("bishop", 2, 7, "black"));
-            pieces.push(createPiece("bishop", 5, 7, "black"));
+            // Move validation (simplified for demonstration)
+            const isValidMove = (piece, targetRow, targetCol) => {
+                if (board[targetRow][targetCol] && board[targetRow][targetCol].color === piece.color) {
+                    return false; // Can't capture same color
+                }
+                // Simplified pawn movement logic
+                if (piece.type === "pawn") {
+                    const direction = piece.color === "white" ? 1 : -1;
+                    if (targetCol === piece.col && !board[targetRow][targetCol]) {
+                        return targetRow === piece.row + direction;
+                    }
+                }
+                // Add other rules for other pieces
+                return true;
+            };
 
-            // Add queens
-            pieces.push(createPiece("queen", 3, 0, "white"));
-            pieces.push(createPiece("queen", 3, 7, "black"));
+            // Mouse input
+            scene.onPointerObservable.add((pointerInfo) => {
+                switch (pointerInfo.type) {
+                    case BABYLON.PointerEventTypes.POINTERPICK:
+                        const pickedMesh = pointerInfo.pickInfo.pickedMesh;
 
-            // Add kings
-            pieces.push(createPiece("king", 4, 0, "white"));
-            pieces.push(createPiece("king", 4, 7, "black"));
+                        if (!pickedMesh) return;
+
+                        if (selectedPiece) {
+                            if (pickedMesh.isTile && isValidMove(selectedPiece, pickedMesh.row, pickedMesh.col)) {
+                                // Move piece
+                                board[selectedPiece.row][selectedPiece.col] = null;
+                                board[pickedMesh.row][pickedMesh.col] = selectedPiece;
+                                selectedPiece.position = pickedMesh.position.clone().add(new BABYLON.Vector3(0, 0.5, 0));
+                                selectedPiece.row = pickedMesh.row;
+                                selectedPiece.col = pickedMesh.col;
+
+                                selectedPiece = null;
+                                isWhiteTurn = !isWhiteTurn;
+                                turnIndicator.innerText = isWhiteTurn ? "White" : "Black";
+                            }
+                        } else if (pickedMesh.type && pickedMesh.color === (isWhiteTurn ? "white" : "black")) {
+                            selectedPiece = pickedMesh;
+                        }
+                        break;
+                }
+            });
 
             return scene;
         };
 
         const scene = createScene();
-
-        // Render loop
         engine.runRenderLoop(() => {
             scene.render();
         });
 
-        // Handle window resizing
         window.addEventListener("resize", () => {
             engine.resize();
         });
