@@ -52,7 +52,7 @@
                     tile.col = col;
 
                     const tileMaterial = new BABYLON.StandardMaterial(`tileMat${row}_${col}`, scene);
-                    tileMaterial.diffuseColor = (row + col) % 2 === 0 ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 0, 0);
+                    tileMaterial.diffuseColor = (row + col) % 2 === 0 ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 1, 0);
                     tile.material = tileMaterial;
                 }
             }
@@ -88,7 +88,7 @@
                 piece.col = col;
 
                 const material = new BABYLON.StandardMaterial(`${type}Mat`, scene);
-                material.diffuseColor = color === "white" ? new BABYLON.Color3(1, 1, 1) : new BABYLON.Color3(0, 0, 0);
+                material.diffuseColor = color === "white" ? new BABYLON.Color3(1, 0, 1) : new BABYLON.Color3(1, 1, 0);
                 piece.material = material;
 
                 pieces.push(piece);
